@@ -14,3 +14,9 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UserUpdateAPIKey(BaseModel):
+    api_key: str
+
+    class Config:
+        from_attributes = True

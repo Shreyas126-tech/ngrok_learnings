@@ -13,3 +13,7 @@ class UserRepo:
         return self.db.query(User).filter(User.email==email).first()
     def get_user_by_name(self,name:str):
         return self.db.query(User).filter(User.name==name).first()
+    def update_user(self,user_id:str,user:User):
+        self.db.add(user)
+        self.db.commit()
+        return user
