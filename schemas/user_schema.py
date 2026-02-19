@@ -20,3 +20,9 @@ class UserUpdateAPIKey(BaseModel):
 
     class Config:
         from_attributes = True
+
+class user_name(BaseModel):
+    name: str
+
+    class Config:
+        from_attributes = True
