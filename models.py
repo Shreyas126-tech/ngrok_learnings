@@ -14,16 +14,16 @@ class User(Base):
 class address(Base):
     __tablename__="addresses"
     id=Column(Integer,primary_key=True,index=True)
-    user_id=Column(Integer,ForeignKey("users.id"))
-    address=Column(String)
-    city=Column(String)
-    state=Column(String)
-    zip_code=Column(String)
+    user_id=Column(Integer,ForeignKey("users.id"),index=True)
+    address=Column(String,index=True)
+    city=Column(String,index=True)
+    state=Column(String,index=True)
+    zip_code=Column(String,index=True)
 
 class order(Base):
     __tablename__="orders"
     id=Column(Integer,primary_key=True,index=True)
-    user_id=Column(Integer,ForeignKey("users.id"))
-    order_date=Column(DateTime,default=func.now())
-    total_amount=Column(Integer)
-    status=Column(String)
+    user_id=Column(Integer,ForeignKey("users.id"),index=True)
+    order_date=Column(DateTime,index=True)
+    total_amount=Column(Integer,index=True)
+    status=Column(String,index=True)
