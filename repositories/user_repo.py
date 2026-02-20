@@ -1,19 +1,27 @@
 from models import User
 from sqlalchemy.orm import Session
 
-
 class UserRepo:
     def __init__(self,db:Session):
-        self.db=db
+        self.db = db
+    
     def add_user(self,user:User):
         self.db.add(user)
         self.db.commit()
         return user
-    def get_user_by_email(self,email:str):
-        return self.db.query(User).filter(User.email==email).first()
-    def get_user_by_name(self,name:str):
-        return self.db.query(User).filter(User.name==name).first()
-    def update_user(self,user_id:str,user:User):
+
+    def get_all_users(self):
+        return self.db.query(User).all()
+
+    def get_user_by_id(self,id:int):
+        return self.db.query(User).filter(User.id == id).first()
+
+    def update_user(self,user:User):
+        self.db.add(user)
+        self.db.commit()
+        return user
+
+    def update_username(self,user:User):
         self.db.add(user)
         self.db.commit()
         return user

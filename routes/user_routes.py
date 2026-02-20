@@ -1,69 +1,52 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from typing import List
-
 from db import get_db
 from models import User
-from schemas.user_schema import UserCreate, UserResponse,UserUpdateAPIKey
+from repositories.user_repo import UserRepo
+from schemas.user_schema import UserSchema, UserUpdateApiKey,user_name
 
 router = APIRouter()
 
-@router.post("/users", response_model=UserResponse)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
+# 1. Create User
+@router.post("/users")
+def create_user(user: UserSchema, db: Session = Depends(get_db)):
+    user_repo = UserRepo(db)
+    new_user = User(email=user.email, password=user.password)
+    created_user = user_repo.add_user(new_user)
+    return {"id": created_user.id, "email": created_user.email}
 
-    
-    existing_user = db.query(User).filter(User.email == user.email).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    new_user = User(
-        name=user.name,
-        email=user.email,
-        password=user.password
-    )
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
-
-
-
-@router.get("/users", response_model=List[UserResponse])
+# 2. Get All Users
+@router.get("/users")
 def get_all_users(db: Session = Depends(get_db)):
-    return db.query(User).all()
+    user_repo = UserRepo(db)
+    users = user_repo.get_all_users()
+    return users
 
-
-
-@router.get("/users/{user_id}", response_model=UserResponse)
-def get_user_by_id(user_id: str, db: Session = Depends(get_db)):
-
-    user = db.query(User).filter(User.id == user_id).first()
-
+# 3. Get User by ID
+@router.get("/users/{user_id}")
+def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
+    user_repo = UserRepo(db)
+    user = user_repo.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
     return user
 
-@router.put("/users/{user_id}", response_model=UserResponse)
-def update_user(user_id: str, user_update: UserUpdateAPIKey, db: Session = Depends(get_db)):
-    user_repo=UserRepo(db)
-    user=user_repo.update_user(user_id,user)
-
+@router.put("/users/{user_id}")
+def update_user(user_id: int, user_update: UserUpdateApiKey, db: Session = Depends(get_db)):
+    user_repo = UserRepo(db)
+    user = user_repo.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-        user_api_key=user_update.api_key
-
+    user.api_key = user_update.api_key
+    user_repo.update_user(user)
     return user
 
-@router.put("/users/{user_id}/api-key", response_model=UserResponse)
-def update_user_api_key(user_id: str, user_update: UserUpdateAPIKey, db: Session = Depends(get_db)):
-    user_repo=UserRepo(db)
-    user=user_repo.update_user(user_id,user)
-
+@router.put("/users/{user_id}/username")
+def update_username(user_id: int, user_update: user_name, db: Session = Depends(get_db)):
+    user_repo = UserRepo(db)
+    user = user_repo.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-        user_api_key=user_update.api_key
-
+    user.user_name = user_update.user_name
+    user_repo.update_user(user)
     return user
